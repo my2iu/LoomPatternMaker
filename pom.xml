@@ -100,7 +100,8 @@
           <!-- DevMode configuration -->
           <warDir>${project.build.directory}/${project.build.finalName}</warDir>
           <classpathScope>compile+runtime</classpathScope>
-          <!-- <devmodeArgs>-bindAddress,0.0.0.0</devmodeArgs>  -->
+          <!-- <devmodeArgs>-style,PRETTY,-bindAddress,0.0.0.0</devmodeArgs>  -->
+          <devmodeArgs>-style,PRETTY</devmodeArgs>
           <!-- URL(s) that should be opened by DevMode (gwt:devmode). -->
           <startupUrls>
             <startupUrl>LoomPatternMaker.html</startupUrl>
