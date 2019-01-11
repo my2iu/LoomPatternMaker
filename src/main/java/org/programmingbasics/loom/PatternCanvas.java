@@ -39,11 +39,21 @@ public class PatternCanvas
     // Figure out sizing of stuff
     colorZoneX = (data.width + 1) * stitchWidth;
 
-    // Hook UI events
+    // Hook mouse events
     canvas.addEventListener(Event.MOUSEDOWN, (e) -> {
       MouseEvent evt = (MouseEvent)e;
       evt.preventDefault();
       evt.stopPropagation();
+      // Check if clicking in a color area
+      if (evt.getOffsetX() > colorZoneX && evt.getOffsetX() < colorZoneX + stitchWidth * colorBoxScale)
+      {
+        int row = findPatternRow(evt.getOffsetX(), evt.getOffsetY());
+        if (row >= 0 && row < data.height)
+          data.rows[row].color = data.rows[row].color.nextColor();
+        draw();
+        return;
+      }
+      // Otherwise, check if the pattern is being drawn
       int row = findPatternRow(evt.getOffsetX(), evt.getOffsetY());
       int col = findPatternCol(evt.getOffsetX(), evt.getOffsetY());
       if (row >= 0 && row < data.height && col >= 0 && col < data.width)
@@ -73,6 +83,8 @@ public class PatternCanvas
       evt.stopPropagation();
       isTrackingMouseOnPattern = false;
     }, false);
+    
+    // Hook touch events
   }
   
   private int findPatternRow(int mouseX, int mouseY)
@@ -95,10 +107,10 @@ public class PatternCanvas
     // Start drawing
     ctx.save();
     ctx.setStrokeStyle("1px black");
-    ctx.setFillStyle("#ccc");
     for (int row = 0; row < data.height; row++)
     {
       PatternRow patternRow = data.rows[row];
+      ctx.setFillStyle(patternRow.color.cssColor);
       int centerY = row * stitchHeight + stitchHeight / 2;
       
       // Draw a row of the pattern 
@@ -123,6 +135,7 @@ public class PatternCanvas
       // Draw a color box on the end
       ctx.beginPath();
       ctx.rect(colorZoneX, (int)(centerY - stitchHeight / 2 * colorBoxScale), (int)(stitchWidth * colorBoxScale), (int)(stitchHeight * colorBoxScale));
+      ctx.fill();
       ctx.stroke();
     }
     ctx.restore();

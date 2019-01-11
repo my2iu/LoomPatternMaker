@@ -18,7 +18,7 @@ public class PatternData
   public static class PatternRow
   {
     public boolean [] data;
-    public int color;  // Decide on this later
+    public RowColor color = RowColor.BLACK;
     
     public PatternRow(int width)
     {
