@@ -8,8 +8,9 @@ public class LoomPatternMaker
 
   public void go()
   {
+    PatternData data = new PatternData();
     PatternCanvas canvas = 
-        new PatternCanvas((CanvasElement)Browser.getDocument().querySelector("canvas#main"));
+        new PatternCanvas((CanvasElement)Browser.getDocument().querySelector("canvas#main"), data);
     canvas.draw();
   }
   
