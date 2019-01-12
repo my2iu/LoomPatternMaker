@@ -9,6 +9,7 @@ import elemental.events.Event;
 import elemental.events.MouseEvent;
 import elemental.events.Touch;
 import elemental.events.TouchEvent;
+import elemental.events.TouchList;
 import elemental.html.CanvasElement;
 import elemental.html.CanvasRenderingContext2D;
 
@@ -28,6 +29,9 @@ public class PatternCanvas
   int colorZoneX;
   float colorBoxScale = 0.8f;
 
+  /** For remapping mouse coordinates to canvas coordinates */
+  double mouseToCanvasRescale = 1.0;
+  
   /** Whether the mouse button was depressed on the pattern portion of the canvas */
   boolean isTrackingMouseOnPattern = false;
   
@@ -42,22 +46,50 @@ public class PatternCanvas
   {
     this.canvas = canvas;
     this.data = data;
+    adjustResolution();
     ctx = (CanvasRenderingContext2D)canvas.getContext("2d");
 
-    // Figure out sizing of stuff
-    colorZoneX = (data.width + 1) * stitchWidth;
+    // Hook events
+    hookEvents();
+  }
 
+  // Adjusts the resolution of the canvas so that we get 1:1 pixels and matches the size of the canvas
+  public void adjustResolution()
+  {
+    // Set the resolution of the canvas appropriately
+    int w = canvas.getClientWidth();
+    int h = canvas.getClientHeight();
+    double pixelRatio = Browser.getWindow().getDevicePixelRatio();
+    mouseToCanvasRescale = pixelRatio;
+    canvas.setWidth((int)(w * pixelRatio));
+    canvas.setHeight((int)(h * pixelRatio));
+    
+    // Alter the sizing of everything to fill the canvas
+    stitchWidth = (int)(canvas.getWidth() / (data.width + 3));
+    stitchHeight = (int)(canvas.getHeight() / data.height);
+    stitchWidth = Math.min(stitchWidth, stitchHeight);
+    stitchHeight = stitchWidth;
+    pillHeight = stitchHeight / 3;
+    pillStraightWidth = stitchWidth - 2 * pillHeight;
+    colorZoneX = (data.width + 1) * stitchWidth;
+    
+  }
+  
+  void hookEvents()
+  {
     // Hook mouse events
     canvas.addEventListener(Event.MOUSEDOWN, (e) -> {
       MouseEvent evt = (MouseEvent)e;
       evt.preventDefault();
       evt.stopPropagation();
+      int mouseX = (int)(evt.getOffsetX() * mouseToCanvasRescale);
+      int mouseY = (int)(evt.getOffsetY() * mouseToCanvasRescale);
       // Check if clicking in a color area
-      if (checkForAndHandleColorPress(evt.getOffsetX(), evt.getOffsetY()))
+      if (checkForAndHandleColorPress(mouseX, mouseY))
         return;
       // Otherwise, check if the pattern is being drawn
-      int row = findPatternRow(evt.getOffsetX(), evt.getOffsetY());
-      int col = findPatternCol(evt.getOffsetX(), evt.getOffsetY());
+      int row = findPatternRow(mouseX, mouseY);
+      int col = findPatternCol(mouseX, mouseY);
       if (row >= 0 && row < data.height && col >= 0 && col < data.width)
       {
         isMouseTurnOn = !data.rows[row].data[col]; 
@@ -71,13 +103,9 @@ public class PatternCanvas
       evt.preventDefault();
       evt.stopPropagation();
       if (!isTrackingMouseOnPattern) return;
-      int row = findPatternRow(evt.getOffsetX(), evt.getOffsetY());
-      int col = findPatternCol(evt.getOffsetX(), evt.getOffsetY());
-      if (row >= 0 && row < data.height && col >= 0 && col < data.width)
-      {
-        data.rows[row].data[col] = isMouseTurnOn;
-        draw();
-      }
+      int mouseX = (int)(evt.getOffsetX() * mouseToCanvasRescale);
+      int mouseY = (int)(evt.getOffsetY() * mouseToCanvasRescale);
+      handlePointerOnPattern(mouseX, mouseY);
     }, false);
     canvas.addEventListener(Event.MOUSEUP, (e) -> {
       MouseEvent evt = (MouseEvent)e;
@@ -92,8 +120,8 @@ public class PatternCanvas
       if (evt.getChangedTouches().getLength() > 1)
         return;
       Touch touch = evt.getChangedTouches().item(0);
-      int mouseX = pageXRelativeToEl(touch.getPageX(), canvas);
-      int mouseY = pageYRelativeToEl(touch.getPageY(), canvas);
+      int mouseX = (int)(pageXRelativeToEl(touch.getPageX(), canvas) * mouseToCanvasRescale);
+      int mouseY = (int)(pageYRelativeToEl(touch.getPageY(), canvas) * mouseToCanvasRescale);
       if (checkForAndHandleColorPress(mouseX, mouseY))
       {
         evt.preventDefault();
@@ -118,44 +146,22 @@ public class PatternCanvas
     canvas.addEventListener(Event.TOUCHMOVE, (e) -> {
       TouchEvent evt = (TouchEvent)e;
       if (!isTrackingTouchOnPattern) return;
-      Touch touch = null;
-      for (int n = 0; n < evt.getTouches().getLength(); n++)
-      {
-        if (evt.getTouches().item(n).getIdentifier() == trackingTouchId)
-          touch = evt.getTouches().item(n);
-      }
+      Touch touch = findTouch(evt.getTouches(), trackingTouchId);
       if (touch == null) return;
-      int mouseX = pageXRelativeToEl(touch.getPageX(), canvas);
-      int mouseY = pageYRelativeToEl(touch.getPageY(), canvas);
-      int row = findPatternRow(mouseX, mouseY);
-      int col = findPatternCol(mouseX, mouseY);
-      if (row >= 0 && row < data.height && col >= 0 && col < data.width)
-      {
-        data.rows[row].data[col] = isMouseTurnOn;
-        draw();
-      }
+      int mouseX = (int)(pageXRelativeToEl(touch.getPageX(), canvas) * mouseToCanvasRescale);
+      int mouseY = (int)(pageYRelativeToEl(touch.getPageY(), canvas) * mouseToCanvasRescale);
+      handlePointerOnPattern(mouseX, mouseY);
       evt.preventDefault();
       evt.stopPropagation();
     }, false);
     canvas.addEventListener(Event.TOUCHEND, (e) -> {
       TouchEvent evt = (TouchEvent)e;
       if (!isTrackingTouchOnPattern) return;
-      Touch touch = null;
-      for (int n = 0; n < evt.getTouches().getLength(); n++)
-      {
-        if (evt.getTouches().item(n).getIdentifier() == trackingTouchId)
-          touch = evt.getTouches().item(n);
-      }
+      Touch touch = findTouch(evt.getTouches(), trackingTouchId);
       if (touch == null) return;
-      int mouseX = pageXRelativeToEl(touch.getPageX(), canvas);
-      int mouseY = pageYRelativeToEl(touch.getPageY(), canvas);
-      int row = findPatternRow(mouseX, mouseY);
-      int col = findPatternCol(mouseX, mouseY);
-      if (row >= 0 && row < data.height && col >= 0 && col < data.width)
-      {
-        data.rows[row].data[col] = isMouseTurnOn;
-        draw();
-      }
+      int mouseX = (int)(pageXRelativeToEl(touch.getPageX(), canvas) * mouseToCanvasRescale);
+      int mouseY = (int)(pageYRelativeToEl(touch.getPageY(), canvas) * mouseToCanvasRescale);
+      handlePointerOnPattern(mouseX, mouseY);
       isTrackingTouchOnPattern = false;
       evt.preventDefault();
       evt.stopPropagation();
@@ -167,7 +173,28 @@ public class PatternCanvas
       isTrackingTouchOnPattern = false;
     }, false);
   }
+  
+  private Touch findTouch(TouchList touches, int identifier)
+  {
+    for (int n = 0; n < touches.getLength(); n++)
+    {
+      if (touches.item(n).getIdentifier() == identifier)
+        return touches.item(n);
+    }
+    return null;
+  }
 
+  private void handlePointerOnPattern(int mouseX, int mouseY)
+  {
+    int row = findPatternRow(mouseX, mouseY);
+    int col = findPatternCol(mouseX, mouseY);
+    if (row >= 0 && row < data.height && col >= 0 && col < data.width)
+    {
+      data.rows[row].data[col] = isMouseTurnOn;
+      draw();
+    }
+  }
+  
   /** Returns true if mouse action is for a color press */
   private boolean checkForAndHandleColorPress(int mouseX, int mouseY)
   {
