@@ -53,9 +53,20 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>com.google.gwt</groupId>
-      <artifactId>gwt-elemental</artifactId>
+	  <groupId>com.user00.domjnate</groupId>
+	  <artifactId>domjnate-base</artifactId>
+	  <version>0.1.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+	  <groupId>com.user00.domjnate</groupId>
+	  <artifactId>domjnate-javafx</artifactId>
+	  <version>0.1.0-SNAPSHOT</version>
       <scope>provided</scope>
+    </dependency>
+    <dependency>
+	  <groupId>com.user00.domjnate</groupId>
+	  <artifactId>domjnate-api</artifactId>
+	  <version>0.1.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -88,14 +99,14 @@
           <moduleName>org.programmingbasics.LoomPatternMaker</moduleName>
           <moduleShortName>LoomPatternMaker</moduleShortName>
           <failOnError>true</failOnError>
-          <!-- GWT compiler 2.8 requires 1.8, hence define sourceLevel here if you use
-               a different source language for java compilation -->
-          <sourceLevel>1.8</sourceLevel>
+          <release>11</release>
           <!-- Compiler configuration -->
           <compilerArgs>
             <!-- Ask GWT to create the Story of Your Compile (SOYC) (gwt:compile) -->
             <arg>-compileReport</arg>
             <arg>-XcompilerMetrics</arg>
+            <arg>-style</arg>
+            <arg>PRETTY</arg>
           </compilerArgs>
           <!-- DevMode configuration -->
           <warDir>${project.build.directory}/${project.build.finalName}</warDir>

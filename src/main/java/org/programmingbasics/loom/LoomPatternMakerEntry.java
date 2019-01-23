@@ -1,14 +1,16 @@
 package org.programmingbasics.loom;
 
 import com.google.gwt.core.client.EntryPoint;
-
-import elemental.client.Browser;
-import elemental.html.CanvasElement;
+import com.user00.domjnate.api.Window;
 
 public class LoomPatternMakerEntry implements EntryPoint
 {
   public void onModuleLoad()
   {
-    new LoomPatternMaker().go();
+    new LoomPatternMaker(win()).go();
   }
+  
+  public static native Window win() /*-{
+     return $wnd;
+   }-*/;
 }

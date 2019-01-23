@@ -3,20 +3,22 @@ package org.programmingbasics.loom;
 
 import org.programmingbasics.loom.PatternData.PatternRow;
 
-import elemental.client.Browser;
-import elemental.dom.Element;
-import elemental.events.Event;
-import elemental.events.MouseEvent;
-import elemental.events.Touch;
-import elemental.events.TouchEvent;
-import elemental.events.TouchList;
-import elemental.html.CanvasElement;
-import elemental.html.CanvasRenderingContext2D;
+import com.user00.domjnate.api.CanvasRenderingContext2D;
+import com.user00.domjnate.api.MouseEvent;
+import com.user00.domjnate.api.Touch;
+import com.user00.domjnate.api.TouchEvent;
+import com.user00.domjnate.api.TouchList;
+import com.user00.domjnate.api.Window;
+import com.user00.domjnate.api.dom.Element;
+import com.user00.domjnate.api.html.HTMLCanvasElement;
+import com.user00.domjnate.api.html.HTMLElement;
+import com.user00.domjnate.util.Js;
 
 public class PatternCanvas
 {
-  CanvasElement canvas;
+  HTMLCanvasElement canvas;
   CanvasRenderingContext2D ctx;
+  Window win;
   
   PatternData data;
   
@@ -40,14 +42,15 @@ public class PatternCanvas
   
   /** Whether a touch has been initiated on the pattern portion of the canvas, plus its id */
   boolean isTrackingTouchOnPattern = false;
-  int trackingTouchId = -1;
+  double trackingTouchId = -1;
   
-  public PatternCanvas(CanvasElement canvas, PatternData data)
+  public PatternCanvas(Window win, HTMLCanvasElement canvas, PatternData data)
   {
+    this.win = win;
     this.canvas = canvas;
     this.data = data;
     adjustResolution();
-    ctx = (CanvasRenderingContext2D)canvas.getContext("2d");
+    ctx = (com.user00.domjnate.api.CanvasRenderingContext2D)canvas.getContext("2d");
 
     // Hook events
     hookEvents();
@@ -57,9 +60,9 @@ public class PatternCanvas
   public void adjustResolution()
   {
     // Set the resolution of the canvas appropriately
-    int w = canvas.getClientWidth();
-    int h = canvas.getClientHeight();
-    double pixelRatio = Browser.getWindow().getDevicePixelRatio();
+    int w = (int)canvas.getClientWidth();
+    int h = (int)canvas.getClientHeight();
+    double pixelRatio = win.getDevicePixelRatio();
     mouseToCanvasRescale = pixelRatio;
     canvas.setWidth((int)(w * pixelRatio));
     canvas.setHeight((int)(h * pixelRatio));
@@ -78,8 +81,8 @@ public class PatternCanvas
   void hookEvents()
   {
     // Hook mouse events
-    canvas.addEventListener(Event.MOUSEDOWN, (e) -> {
-      MouseEvent evt = (MouseEvent)e;
+    canvas.addEventListener("mousedown", (e) -> {
+      MouseEvent evt = Js.cast(e, MouseEvent.class);
       evt.preventDefault();
       evt.stopPropagation();
       int mouseX = (int)(evt.getOffsetX() * mouseToCanvasRescale);
@@ -98,8 +101,8 @@ public class PatternCanvas
         draw();
       }
     }, false);
-    canvas.addEventListener(Event.MOUSEMOVE, (e) -> {
-      MouseEvent evt = (MouseEvent)e;
+    canvas.addEventListener("mousemove", (e) -> {
+      MouseEvent evt = Js.cast(e, MouseEvent.class);
       evt.preventDefault();
       evt.stopPropagation();
       if (!isTrackingMouseOnPattern) return;
@@ -107,16 +110,16 @@ public class PatternCanvas
       int mouseY = (int)(evt.getOffsetY() * mouseToCanvasRescale);
       handlePointerOnPattern(mouseX, mouseY);
     }, false);
-    canvas.addEventListener(Event.MOUSEUP, (e) -> {
-      MouseEvent evt = (MouseEvent)e;
+    canvas.addEventListener("mouseup", (e) -> {
+      MouseEvent evt = Js.cast(e, MouseEvent.class);
       evt.preventDefault();
       evt.stopPropagation();
       isTrackingMouseOnPattern = false;
     }, false);
     
     // Hook touch events
-    canvas.addEventListener(Event.TOUCHSTART, (e) -> {
-      TouchEvent evt = (TouchEvent)e;
+    canvas.addEventListener("touchstart", (e) -> {
+      TouchEvent evt = Js.cast(e, TouchEvent.class);
       if (evt.getChangedTouches().getLength() > 1)
         return;
       Touch touch = evt.getChangedTouches().item(0);
@@ -143,8 +146,8 @@ public class PatternCanvas
         evt.stopPropagation();
       }
     }, false);
-    canvas.addEventListener(Event.TOUCHMOVE, (e) -> {
-      TouchEvent evt = (TouchEvent)e;
+    canvas.addEventListener("touchmove", (e) -> {
+      TouchEvent evt = Js.cast(e, TouchEvent.class);
       if (!isTrackingTouchOnPattern) return;
       Touch touch = findTouch(evt.getTouches(), trackingTouchId);
       if (touch == null) return;
@@ -154,8 +157,8 @@ public class PatternCanvas
       evt.preventDefault();
       evt.stopPropagation();
     }, false);
-    canvas.addEventListener(Event.TOUCHEND, (e) -> {
-      TouchEvent evt = (TouchEvent)e;
+    canvas.addEventListener("touchend", (e) -> {
+      TouchEvent evt = Js.cast(e, TouchEvent.class);
       if (!isTrackingTouchOnPattern) return;
       Touch touch = findTouch(evt.getTouches(), trackingTouchId);
       if (touch == null) return;
@@ -166,15 +169,15 @@ public class PatternCanvas
       evt.preventDefault();
       evt.stopPropagation();
     }, false);
-    canvas.addEventListener(Event.TOUCHCANCEL, (e) -> {
-      TouchEvent evt = (TouchEvent)e;
+    canvas.addEventListener("touchcancel", (e) -> {
+      TouchEvent evt = Js.cast(e, TouchEvent.class);
       evt.preventDefault();
       evt.stopPropagation();
       isTrackingTouchOnPattern = false;
     }, false);
   }
   
-  private Touch findTouch(TouchList touches, int identifier)
+  private Touch findTouch(TouchList touches, double identifier)
   {
     for (int n = 0; n < touches.getLength(); n++)
     {
@@ -221,7 +224,7 @@ public class PatternCanvas
     return (int)(mouseX / stitchWidth);
   }
   
-  public static int pageXRelativeToEl(int x, Element element)
+  public static double pageXRelativeToEl(double x, HTMLElement element)
   {
     // Convert pageX and pageY numbers to be relative to a certain element
     int pageX = 0, pageY = 0;
@@ -231,13 +234,13 @@ public class PatternCanvas
       pageY += element.getOffsetTop();
       pageX -= element.getScrollLeft();
       pageY -= element.getScrollTop();
-      element = element.getOffsetParent();
+      element = Js.cast(element.getOffsetParent(), HTMLElement.class);
     }
     x = x - pageX;
     return x;
   }
 
-  public static int pageYRelativeToEl(int y, Element element)
+  public static double pageYRelativeToEl(double y, HTMLElement element)
   {
     // Convert pageX and pageY numbers to be relative to a certain element
     int pageX = 0, pageY = 0;
@@ -247,7 +250,7 @@ public class PatternCanvas
       pageY += element.getOffsetTop();
       pageX -= element.getScrollLeft();
       pageY -= element.getScrollTop();
-      element = element.getOffsetParent();
+      element = Js.cast(element.getOffsetParent(), HTMLElement.class);
     }
     y = y - pageY;
     return y;
