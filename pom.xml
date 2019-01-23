@@ -61,7 +61,6 @@
 	  <groupId>com.user00.domjnate</groupId>
 	  <artifactId>domjnate-javafx</artifactId>
 	  <version>0.1.0-SNAPSHOT</version>
-      <scope>provided</scope>
     </dependency>
     <dependency>
 	  <groupId>com.user00.domjnate</groupId>
@@ -74,6 +73,21 @@
       <version>4.11</version>
       <scope>test</scope>
     </dependency>
+   	<dependency>
+    	<groupId>org.openjfx</groupId>
+    	<artifactId>javafx-web</artifactId>
+    	<version>11.0.1</version>
+	</dependency>
+   	<dependency>
+    	<groupId>org.openjfx</groupId>
+    	<artifactId>javafx-controls</artifactId>
+    	<version>11.0.1</version>
+	</dependency>
+	<dependency>
+    	<groupId>org.openjfx</groupId>
+    	<artifactId>javafx-fxml</artifactId>
+    	<version>11.0.1</version>
+	</dependency>
   </dependencies>
 
   <build>

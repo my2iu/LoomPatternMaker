@@ -50,7 +50,7 @@ public class PatternCanvas
     this.canvas = canvas;
     this.data = data;
     adjustResolution();
-    ctx = (com.user00.domjnate.api.CanvasRenderingContext2D)canvas.getContext("2d");
+    ctx = Js.cast(canvas.getContext("2d"), CanvasRenderingContext2D.class);
 
     // Hook events
     hookEvents();
