@@ -11,9 +11,11 @@ import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Worker.State;
+import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebEvent;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import netscape.javascript.JSObject;
@@ -32,18 +34,23 @@ public class LoomPatternMakerJavaFx extends Application
     WebEngine engine = webView.getEngine();
     engine.getLoadWorker().stateProperty().addListener(
         new ChangeListener<State>() {
-            public void changed(ObservableValue ov, State oldState, State newState) {
-                if (newState == State.SUCCEEDED) {
-                  JSObject jsWin = (JSObject)engine.executeScript("window");
-                  Window win = DomjnateFx.createJsBridgeGlobalsProxy(Window.class, jsWin);
-                  new LoomPatternMaker(win).go();
-                }
+          public void changed(ObservableValue ov, State oldState, State newState) {
+            if (newState == State.SUCCEEDED) {
+              JSObject jsWin = (JSObject)engine.executeScript("window");
+              Window win = DomjnateFx.createJsBridgeGlobalsProxy(Window.class, jsWin);
+              new LoomPatternMaker(win).go();
             }
+          }
         });
+    engine.setOnAlert(new EventHandler<WebEvent<String>>() {
+      @Override
+      public void handle(WebEvent<String> msg) {
+        System.err.println(msg.getData());
+      }});
     engine.load(
         new File("src/main/webapp/LoomPatternMaker.html").toURI().toURL().toExternalForm());
   }
-  
+
   public static void main(String[] args)
   {
     launch(args);
