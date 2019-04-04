@@ -6,6 +6,32 @@
     <link type="text/css" rel="stylesheet" href="LoomPatternMaker.css">
     <title>Loom Pattern Maker</title>
     
+    <script>
+    	function onGwtLoaded()
+    	{
+    		var canvasElement = document.querySelector("canvas#main");
+    	    var loomWidget = org.programmingbasics.loom.LoomPatternMaker.createUi(canvasElement);
+    	    
+    	    // Hook for resizing
+    	    window.addEventListener("resize", (e) => {
+    	    	// Tell the loom widget that the canvas has resized, and it should
+    	    	// recalculate the sizing of elements and redraw itself
+    	    	loomWidget.handleResize();
+    	    }, false);
+    	}
+    	
+    	// Example code showing how to load data into and save data out of the loom widget]
+    	function exampleLoadSave()
+    	{
+    	    // The code below gets data out of the widget in JSON form. It can
+    	    // be serialized to a string and saved in local storage
+    	    var data = loomWidget.getDataJson();
+    	    
+    	    // Below is the code for loading data back into the loom
+    	    loomWidget.setDataJson(
+    	    		[{"color":"BLACK","data":"0000000000000"},{"color":"RED","data":"0100000000010"},{"color":"BLACK","data":"0000000000000"}]);
+    	}
+    </script>
     <script type="text/javascript" language="javascript" src="loompatternmaker/loompatternmaker.nocache.js"></script>
   </head>
 

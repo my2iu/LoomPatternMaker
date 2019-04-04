@@ -96,12 +96,13 @@
             <!-- Ask GWT to create the Story of Your Compile (SOYC) (gwt:compile) -->
             <arg>-compileReport</arg>
             <arg>-XcompilerMetrics</arg>
+            <arg>-generateJsInteropExports</arg>
           </compilerArgs>
           <!-- DevMode configuration -->
           <warDir>${project.build.directory}/${project.build.finalName}</warDir>
           <classpathScope>compile+runtime</classpathScope>
-          <!-- <devmodeArgs>-style,PRETTY,-bindAddress,0.0.0.0</devmodeArgs>  -->
-          <devmodeArgs>-style,PRETTY</devmodeArgs>
+          <!-- <devmodeArgs>-style,PRETTY,-bindAddress,0.0.0.0,-generateJsInteropExports</devmodeArgs>  -->
+          <devmodeArgs>-style,PRETTY,-generateJsInteropExports</devmodeArgs>
           <!-- URL(s) that should be opened by DevMode (gwt:devmode). -->
           <startupUrls>
             <startupUrl>LoomPatternMaker.html</startupUrl>
