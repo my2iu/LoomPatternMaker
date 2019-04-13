@@ -294,4 +294,39 @@ public class PatternCanvas
     }
     ctx.restore();
   }
+  
+  private void drawStitch(float centerX, float centerY, boolean isFill)
+  {
+     ctx.save();
+     try {
+        ctx.translate(centerX, centerY);
+        ctx.scale((float)(2 * stitchWidth / 500.0), (float)(2 * stitchWidth / 500.0));
+        ctx.beginPath();
+        ctx.moveTo(0, 50);
+        ctx.arc(50, 50, 50, (float)(- Math.PI), (float)(- Math.PI / 2), false);
+        ctx.lineTo(330-50, 0);
+        ctx.arc(330-50, 50, 50, (float)(-Math.PI / 2), 0, false);
+        ctx.arc(330 + 50, 50, 50, (float)(Math.PI), (float)(Math.PI / 2), true);
+        ctx.lineTo(500-50, 100);
+        ctx.arc(500-50, 150, 50, (float)(-Math.PI / 2), 0, false);
+        ctx.lineTo(500, 270 - 50);
+        ctx.arc(500-50, 270 - 50, 50, 0, (float)(Math.PI / 2), false);
+        ctx.lineTo(220, 270);
+        ctx.arc(220, 270 - 50, 50, (float)(Math.PI / 2), (float)(Math.PI), false);
+        ctx.arc(220 - 50 - 50, 270 - 50, 50, 0, (float)(- Math.PI / 2), true);
+        ctx.lineTo(50, 270 - 50 - 50);
+        ctx.arc(50, 270 - 50 - 50 - 50, 50, (float)(Math.PI / 2), (float)(Math.PI), false);
+
+//        curve is 50?
+        
+        ctx.closePath();
+        if (isFill)
+           ctx.fill();
+         ctx.stroke();
+              
+     } finally {
+        ctx.restore();
+     }
+     
+  }
 }
