@@ -261,41 +261,52 @@ public class PatternCanvas
     // Start drawing
     ctx.save();
     ctx.setStrokeStyle("1px black");
+    DrawOrder order = new DrawOrder(data.height, data.width);
+    while (order.hasNext())
+    {
+      order.next();
+      int row = order.row;
+      int col = order.col;
+      PatternRow patternRow = data.rows[row];
+      int centerY = row * stitchHeight + stitchHeight / 2;
+      int centerX = col * stitchWidth + stitchWidth / 2;
+//        if ((row % 2) != 0)
+//          centerX += stitchWidth / 2;
+
+//        ctx.beginPath();
+//        ctx.moveTo(centerX - pillStraightWidth / 2, centerY - pillHeight / 2);
+//        ctx.lineTo(centerX + pillStraightWidth / 2, centerY - pillHeight / 2);
+//        ctx.arc(centerX + pillStraightWidth / 2, centerY, pillHeight / 2, (float)(- Math.PI / 2), (float)(Math.PI / 2), false);
+//        ctx.lineTo(centerX - pillStraightWidth / 2, centerY + pillHeight / 2);
+//        ctx.arc(centerX - pillStraightWidth / 2, centerY, pillHeight / 2, (float)(Math.PI / 2), (float)(-Math.PI / 2), false);
+//        ctx.closePath();
+//        if (patternRow.data[col])
+//          ctx.fill();
+//        ctx.stroke();
+
+      drawStitch(centerX, centerY);
+      if (patternRow.data[col])
+        ctx.setFillStyle(patternRow.color.cssColor);
+      else
+        ctx.setFillStyle("#fff");
+      ctx.fill();
+      ctx.stroke();
+    }
     for (int row = 0; row < data.height; row++)
     {
-      PatternRow patternRow = data.rows[row];
-      ctx.setFillStyle(patternRow.color.cssColor);
       int centerY = row * stitchHeight + stitchHeight / 2;
-      
-      // Draw a row of the pattern 
-      for (int col = 0; col < data.width; col++)
-      {
-        int centerX = col * stitchWidth + stitchWidth / 2;
-        if ((row % 2) != 0)
-          centerX += stitchWidth / 2;
-
-        ctx.beginPath();
-        ctx.moveTo(centerX - pillStraightWidth / 2, centerY - pillHeight / 2);
-        ctx.lineTo(centerX + pillStraightWidth / 2, centerY - pillHeight / 2);
-        ctx.arc(centerX + pillStraightWidth / 2, centerY, pillHeight / 2, (float)(- Math.PI / 2), (float)(Math.PI / 2), false);
-        ctx.lineTo(centerX - pillStraightWidth / 2, centerY + pillHeight / 2);
-        ctx.arc(centerX - pillStraightWidth / 2, centerY, pillHeight / 2, (float)(Math.PI / 2), (float)(-Math.PI / 2), false);
-        ctx.closePath();
-        if (patternRow.data[col])
-          ctx.fill();
-        ctx.stroke();
-      }
-      
+      PatternRow patternRow = data.rows[row];
       // Draw a color box on the end
       ctx.beginPath();
       ctx.rect(colorZoneX, (int)(centerY - stitchHeight / 2 * colorBoxScale), (int)(stitchWidth * colorBoxScale), (int)(stitchHeight * colorBoxScale));
+      ctx.setFillStyle(patternRow.color.cssColor);
       ctx.fill();
       ctx.stroke();
     }
     ctx.restore();
   }
   
-  private void drawStitch(float centerX, float centerY, boolean isFill)
+  private void drawStitch(float centerX, float centerY)
   {
      ctx.save();
      try {
@@ -320,13 +331,52 @@ public class PatternCanvas
 //        curve is 50?
         
         ctx.closePath();
-        if (isFill)
-           ctx.fill();
-         ctx.stroke();
-              
      } finally {
         ctx.restore();
      }
      
+  }
+  
+  // Draw order of the stitches is a little complicated (they're drawn
+  // diagonally starting from the upper-right), so I'm putting that
+  // logic in its own class
+  public static class DrawOrder
+  {
+    int rowCount;
+    int colCount;
+    DrawOrder(int rowCount, int colCount)
+    {
+      this.rowCount = rowCount;
+      this.colCount = colCount;
+      reset();
+    }
+    
+    int row;
+    int col;
+    void reset()
+    {
+      row = 0;
+      col = colCount;
+    }
+    
+    boolean hasNext()
+    {
+      return !(row == rowCount - 1 && col == 0);
+    }
+    
+    void next()
+    {
+      row--;
+      col--;
+      if (row < 0 || col < 0)
+      {
+        row++;
+        while (col < colCount - 1 && row < rowCount - 1)
+        {
+          row++;
+          col++;
+        }
+      }
+    }
   }
 }
