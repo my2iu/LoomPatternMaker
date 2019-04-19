@@ -97,6 +97,8 @@
             <arg>-compileReport</arg>
             <arg>-XcompilerMetrics</arg>
             <arg>-generateJsInteropExports</arg>
+            <arg>-style</arg>
+            <arg>PRETTY</arg>
           </compilerArgs>
           <!-- DevMode configuration -->
           <warDir>${project.build.directory}/${project.build.finalName}</warDir>
