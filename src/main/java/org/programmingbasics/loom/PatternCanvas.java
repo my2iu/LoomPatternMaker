@@ -23,8 +23,8 @@ public class PatternCanvas
   // Width and height of a stitch in pixels
   int stitchXSpacing = 22;
   int stitchYSpacing = 22;
-  double stitchWidth = stitchXSpacing;
-  double stitchHeight = stitchYSpacing;
+  int stitchWidth = stitchXSpacing;
+  int stitchHeight = stitchYSpacing;
 
   static final double STITCH_X_OVERLAP = 0.25;
   static final double STITCH_Y_OVERLAP = 0.2;
@@ -220,14 +220,18 @@ public class PatternCanvas
   
   private int findPatternRow(int mouseX, int mouseY)
   {
-    return (int)(mouseY / stitchYSpacing);
+     double row = (double)mouseY / stitchYSpacing;
+     if (row > data.height && mouseY - ((data.height - 1) * stitchYSpacing) < stitchHeight)
+        return data.height - 1;
+    return (int)row;
   }
   
   private int findPatternCol(int mouseX, int mouseY)
   {
-    int row = findPatternRow(mouseX, mouseY);
-    if ((row % 2) != 0) mouseX -= stitchXSpacing / 2;
-    return (int)(mouseX / stitchXSpacing);
+//    int row = findPatternRow(mouseX, mouseY);
+//    if ((row % 2) != 0) mouseX -= stitchXSpacing / 2;
+     int col = (int)((mouseX - (double)stitchWidth * STITCH_X_OVERLAP) / stitchXSpacing);
+    return col < 0 ? 0 : col;
   }
   
   public static int pageXRelativeToEl(int x, Element element)
@@ -269,7 +273,8 @@ public class PatternCanvas
     
     // Start drawing
     ctx.save();
-    ctx.setStrokeStyle("1px black");
+    ctx.setLineWidth((float)mouseToCanvasRescale);
+    ctx.setStrokeStyle("black");
     DrawOrder order = new DrawOrder(data.height, data.width);
     while (order.hasNext())
     {
