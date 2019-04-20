@@ -39,8 +39,25 @@
     	    		{"foreground":"red","background":"lightblue","rows":[{"data":"0011000010"},{"data":"0000000010"},{"data":"0000000010"},{"data":"0000000010"},{"data":"0000000010"},{"data":"0000000000"},{"data":"0000000000"}]}
     	    		);
     	}
+    	
+    	function exampleToSvg()
+    	{
+    		var jsonData = {"foreground":"red","background":"lightblue","rows":[{"data":"0011000010"},{"data":"0000000010"},{"data":"0000000010"},{"data":"0000000010"},{"data":"0000000010"},{"data":"0000000000"},{"data":"0000000000"}]};
+    		var baseSvg = document.querySelector('script[type=loomsvg]').textContent;
+			var svg = org.programmingbasics.loom.LoomPatternMaker.createSvgLaserCutterFile(baseSvg, jsonData);
+			console.log(svg);
+    	}
     </script>
     <script type="text/javascript" language="javascript" src="loompatternmaker/loompatternmaker.nocache.js"></script>
+    
+    <script type="loomsvg">
+<svg width="3.7777777777777777in" height="2.4583333333333335in" viewBox="0 0 272 177" stroke-linecap="round" stroke-linejoin="round" >
+<path d="M 0 0 L 0 57.00000000000003 L 99.00000000000001 57.00000000000003 L 99.00000000000001 0 L 0 0 z" fill="#000000" />
+<path d="M 170 5 L 170 58 L 244.99999999999997 58 L 244.99999999999997 5 L 170 5 z" fill="#000000" />
+<path d="M 49 118.00000000000001 L 49 177 L 132 177 L 132 118.00000000000001 L 49 118.00000000000001 z" fill="#000000" />
+<path d="M 168 110.00000000000001 L 168 151 L 272 151 L 272 110.00000000000001 L 168 110.00000000000001 z" fill="#000000" />
+</svg>
+    </script>
   </head>
 
   <body>
