@@ -25,6 +25,9 @@ public class PatternCanvas
   int stitchYSpacing = 22;
   int stitchWidth = stitchXSpacing;
   int stitchHeight = stitchYSpacing;
+  
+  // Margin running around the outside of the canvas
+  int margin;
 
   static final double STITCH_X_OVERLAP = 0.25;
   static final double STITCH_Y_OVERLAP = 0.2;
@@ -71,10 +74,11 @@ public class PatternCanvas
     mouseToCanvasRescale = pixelRatio;
     canvas.setWidth((int)(w * pixelRatio));
     canvas.setHeight((int)(h * pixelRatio));
+    margin = (int)(1 + Math.ceil(pixelRatio));
     
     // Alter the sizing of everything to fill the canvas
-    stitchXSpacing = (int)(canvas.getWidth() / (data.width + STITCH_X_OVERLAP));
-    stitchYSpacing = (int)(canvas.getHeight() / data.height + STITCH_Y_OVERLAP);
+    stitchXSpacing = (int)((canvas.getWidth() - 2 * margin) / (data.width + STITCH_X_OVERLAP));
+    stitchYSpacing = (int)((canvas.getHeight() - 2 * margin) / data.height + STITCH_Y_OVERLAP);
     stitchWidth = (int)(stitchXSpacing / (1 - STITCH_X_OVERLAP));
     stitchHeight = (int)(stitchYSpacing / (1 - STITCH_Y_OVERLAP));
     stitchXSpacing = (int)Math.min(stitchXSpacing, stitchHeight * STITCH_SIZE_RATIO * (1 - STITCH_X_OVERLAP));
@@ -224,17 +228,19 @@ public class PatternCanvas
   
   private int findPatternRow(int mouseX, int mouseY)
   {
-     double row = (double)mouseY / stitchYSpacing;
-     if (row > data.height && mouseY - ((data.height - 1) * stitchYSpacing) < stitchHeight)
-        return data.height - 1;
+    mouseY -= margin;
+    double row = (double)mouseY / stitchYSpacing;
+    if (row > data.height && mouseY - ((data.height - 1) * stitchYSpacing) < stitchHeight)
+      return data.height - 1;
     return (int)row;
   }
   
   private int findPatternCol(int mouseX, int mouseY)
   {
+    mouseX -= margin;
 //    int row = findPatternRow(mouseX, mouseY);
 //    if ((row % 2) != 0) mouseX -= stitchXSpacing / 2;
-     int col = (int)((mouseX - (double)stitchWidth * STITCH_X_OVERLAP) / stitchXSpacing);
+    int col = (int)((mouseX - (double)stitchWidth * STITCH_X_OVERLAP) / stitchXSpacing);
     return col < 0 ? 0 : col;
   }
   
@@ -286,8 +292,8 @@ public class PatternCanvas
       int row = order.row;
       int col = order.col;
       PatternRow patternRow = data.rows[row];
-      int centerY = (int)(row * stitchYSpacing);
-      int centerX = (int)(col * stitchXSpacing);
+      int y = (int)(row * stitchYSpacing) + margin;
+      int x = (int)(col * stitchXSpacing) + margin;
 //        if ((row % 2) != 0)
 //          centerX += stitchWidth / 2;
 
@@ -302,7 +308,7 @@ public class PatternCanvas
 //          ctx.fill();
 //        ctx.stroke();
 
-      drawStitch(centerX, centerY);
+      drawStitch(x, y);
       if (patternRow.data[col])
         ctx.setFillStyle(data.fgndColor);
       else
