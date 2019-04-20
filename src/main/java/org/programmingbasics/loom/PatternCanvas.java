@@ -106,6 +106,7 @@ public class PatternCanvas
       // Otherwise, check if the pattern is being drawn
       int row = findPatternRow(mouseX, mouseY);
       int col = findPatternCol(mouseX, mouseY);
+      if (readOnly) return;
       if (row >= 0 && row < data.height && col >= 0 && col < data.width)
       {
         isMouseTurnOn = !data.rows[row].data[col]; 
@@ -147,6 +148,7 @@ public class PatternCanvas
       // Otherwise, check if the pattern is being drawn
       int row = findPatternRow(mouseX, mouseY);
       int col = findPatternCol(mouseX, mouseY);
+      if (readOnly) return;
       if (row >= 0 && row < data.height && col >= 0 && col < data.width)
       {
         isMouseTurnOn = !data.rows[row].data[col]; 
@@ -204,7 +206,6 @@ public class PatternCanvas
   {
     int row = findPatternRow(mouseX, mouseY);
     int col = findPatternCol(mouseX, mouseY);
-    if (readOnly) return;
     if (row >= 0 && row < data.height && col >= 0 && col < data.width)
     {
       data.rows[row].data[col] = isMouseTurnOn;
