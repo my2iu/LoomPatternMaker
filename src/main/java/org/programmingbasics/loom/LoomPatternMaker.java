@@ -44,25 +44,33 @@ public class LoomPatternMaker
   // Returns data from the loom pattern
   public JavaScriptObject getDataJson()
   {
+    JsonObject json = Json.createObject();
+    json.put("foreground", data.fgndColor);
+    json.put("background", data.bgndColor);
     JsonArray arr = Json.createArray();
+    json.put("rows", arr);
     for (PatternRow row: data.rows)
     {
       JsonObject rowJson = Json.createObject();
       arr.set(arr.length(), rowJson);
-//      rowJson.put("color", row.color.name());
+      //      rowJson.put("color", row.color.name());
       String rowData = "";
       for (boolean bit: row.data)
         rowData += (bit ? "1" : "0");
       rowJson.put("data", rowData);
     }
-    return (JavaScriptObject)arr;
+    return (JavaScriptObject)json;
   }
   
   // Sets data for the loom pattern
-  public void setDataJson(JsonArray arr)
+  public void setDataJson(JsonObject json)
   {
+    JsonArray arr = json.getArray("rows");
     int height = arr.length();
     data.height = height;
+    data.fgndColor = json.getString("foreground");
+    data.bgndColor = json.getString("background");
+
     List<PatternRow> rows = new ArrayList<>();
     for (int n = 0; n < arr.length(); n++)
     {

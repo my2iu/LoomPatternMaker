@@ -7,12 +7,13 @@
     <title>Loom Pattern Maker</title>
     
     <script>
+    	var loomWidget;
     	function onGwtLoaded()
     	{
     		var width = 10;
     		var height = 10;
     		var canvasElement = document.querySelector("canvas#main");
-    	    var loomWidget = org.programmingbasics.loom.LoomPatternMaker.createUi(canvasElement, width, height);
+    	    loomWidget = org.programmingbasics.loom.LoomPatternMaker.createUi(canvasElement, width, height);
     	    
     	    // Using dark grey and white as the pattern colors
     	    loomWidget.setForegroundColor("#111");
@@ -35,7 +36,8 @@
     	    
     	    // Below is the code for loading data back into the loom
     	    loomWidget.setDataJson(
-    	    		[{"color":"BLACK","data":"0000000000000"},{"color":"RED","data":"0100000000010"},{"color":"BLACK","data":"0000000000000"}]);
+    	    		{"foreground":"red","background":"lightblue","rows":[{"data":"0011000010"},{"data":"0000000010"},{"data":"0000000010"},{"data":"0000000010"},{"data":"0000000010"},{"data":"0000000000"},{"data":"0000000000"}]}
+    	    		);
     	}
     </script>
     <script type="text/javascript" language="javascript" src="loompatternmaker/loompatternmaker.nocache.js"></script>
