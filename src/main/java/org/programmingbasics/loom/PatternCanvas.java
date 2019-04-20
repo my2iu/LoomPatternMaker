@@ -21,11 +21,16 @@ public class PatternCanvas
   PatternData data;
   
   // Width and height of a stitch in pixels
-  int stitchWidth = 22;
-  int stitchHeight = 22;
+  int stitchXSpacing = 22;
+  int stitchYSpacing = 22;
+  double stitchWidth = stitchXSpacing;
+  double stitchHeight = stitchYSpacing;
 
-  int pillHeight = stitchHeight / 3;
-  int pillStraightWidth = stitchWidth - 2 * pillHeight;
+  static final double STITCH_X_OVERLAP = 0.25;
+  static final double STITCH_Y_OVERLAP = 0.2;
+  static final double STITCH_SIZE_RATIO = 500.0 / 270.0; 
+//  int pillHeight = stitchHeight / 3;
+//  int pillStraightWidth = stitchWidth - 2 * pillHeight;
   int colorZoneX;
   float colorBoxScale = 0.8f;
 
@@ -65,13 +70,17 @@ public class PatternCanvas
     canvas.setHeight((int)(h * pixelRatio));
     
     // Alter the sizing of everything to fill the canvas
-    stitchWidth = (int)(canvas.getWidth() / (data.width + 3));
-    stitchHeight = (int)(canvas.getHeight() / data.height);
-    stitchWidth = Math.min(stitchWidth, stitchHeight);
-    stitchHeight = stitchWidth;
-    pillHeight = stitchHeight / 3;
-    pillStraightWidth = stitchWidth - 2 * pillHeight;
-    colorZoneX = (data.width + 1) * stitchWidth;
+    stitchXSpacing = (int)(canvas.getWidth() / (data.width + STITCH_X_OVERLAP));
+    stitchYSpacing = (int)(canvas.getHeight() / data.height + STITCH_Y_OVERLAP);
+    stitchWidth = (int)(stitchXSpacing / (1 - STITCH_X_OVERLAP));
+    stitchHeight = (int)(stitchYSpacing / (1 - STITCH_Y_OVERLAP));
+    stitchXSpacing = (int)Math.min(stitchXSpacing, stitchHeight * STITCH_SIZE_RATIO * (1 - STITCH_X_OVERLAP));
+    stitchWidth = (int)(stitchXSpacing / (1 - STITCH_X_OVERLAP));
+    stitchHeight = (int)(stitchWidth / STITCH_SIZE_RATIO);
+    stitchYSpacing = (int)(stitchHeight * (1 - STITCH_Y_OVERLAP));
+//    pillHeight = stitchHeight / 3;
+//    pillStraightWidth = stitchWidth - 2 * pillHeight;
+    colorZoneX = (data.width + 1) * stitchXSpacing;
     
   }
   
@@ -198,7 +207,7 @@ public class PatternCanvas
   /** Returns true if mouse action is for a color press */
   private boolean checkForAndHandleColorPress(int mouseX, int mouseY)
   {
-    if (mouseX > colorZoneX && mouseX < colorZoneX + stitchWidth * colorBoxScale)
+    if (mouseX > colorZoneX && mouseX < colorZoneX + stitchXSpacing * colorBoxScale)
     {
       int row = findPatternRow(mouseX, mouseY);
       if (row >= 0 && row < data.height)
@@ -211,14 +220,14 @@ public class PatternCanvas
   
   private int findPatternRow(int mouseX, int mouseY)
   {
-    return (int)(mouseY / stitchHeight);
+    return (int)(mouseY / stitchYSpacing);
   }
   
   private int findPatternCol(int mouseX, int mouseY)
   {
     int row = findPatternRow(mouseX, mouseY);
-    if ((row % 2) != 0) mouseX -= stitchWidth / 2;
-    return (int)(mouseX / stitchWidth);
+    if ((row % 2) != 0) mouseX -= stitchXSpacing / 2;
+    return (int)(mouseX / stitchXSpacing);
   }
   
   public static int pageXRelativeToEl(int x, Element element)
@@ -268,8 +277,8 @@ public class PatternCanvas
       int row = order.row;
       int col = order.col;
       PatternRow patternRow = data.rows[row];
-      int centerY = row * stitchHeight + stitchHeight / 2;
-      int centerX = col * stitchWidth + stitchWidth / 2;
+      int centerY = (int)(row * stitchYSpacing);
+      int centerX = (int)(col * stitchXSpacing);
 //        if ((row % 2) != 0)
 //          centerX += stitchWidth / 2;
 
@@ -294,11 +303,11 @@ public class PatternCanvas
     }
     for (int row = 0; row < data.height; row++)
     {
-      int centerY = row * stitchHeight + stitchHeight / 2;
+      int centerY = row * stitchYSpacing + stitchYSpacing / 2;
       PatternRow patternRow = data.rows[row];
       // Draw a color box on the end
       ctx.beginPath();
-      ctx.rect(colorZoneX, (int)(centerY - stitchHeight / 2 * colorBoxScale), (int)(stitchWidth * colorBoxScale), (int)(stitchHeight * colorBoxScale));
+      ctx.rect(colorZoneX, (int)(centerY - stitchYSpacing / 2 * colorBoxScale), (int)(stitchXSpacing * colorBoxScale), (int)(stitchYSpacing * colorBoxScale));
       ctx.setFillStyle(patternRow.color.cssColor);
       ctx.fill();
       ctx.stroke();
@@ -306,12 +315,12 @@ public class PatternCanvas
     ctx.restore();
   }
   
-  private void drawStitch(float centerX, float centerY)
+  private void drawStitch(float x, float y)
   {
      ctx.save();
      try {
-        ctx.translate(centerX, centerY);
-        ctx.scale((float)(2 * stitchWidth / 500.0), (float)(2 * stitchWidth / 500.0));
+        ctx.translate(x, y);
+        ctx.scale((float)(stitchWidth / 500.0), (float)(stitchHeight / 270.0));
         ctx.beginPath();
         ctx.moveTo(0, 50);
         ctx.arc(50, 50, 50, (float)(- Math.PI), (float)(- Math.PI / 2), false);
