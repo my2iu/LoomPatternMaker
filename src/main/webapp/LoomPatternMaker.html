@@ -9,8 +9,14 @@
     <script>
     	function onGwtLoaded()
     	{
+    		var width = 10;
+    		var height = 10;
     		var canvasElement = document.querySelector("canvas#main");
-    	    var loomWidget = org.programmingbasics.loom.LoomPatternMaker.createUi(canvasElement);
+    	    var loomWidget = org.programmingbasics.loom.LoomPatternMaker.createUi(canvasElement, width, height);
+    	    
+    	    // Using dark grey and white as the pattern colors
+    	    loomWidget.setForegroundColor("#111");
+    	    loomWidget.setBackgroundColor("white");
     	    
     	    // Hook for resizing
     	    window.addEventListener("resize", (e) => {

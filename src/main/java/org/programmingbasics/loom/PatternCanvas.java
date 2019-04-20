@@ -34,6 +34,9 @@ public class PatternCanvas
   int colorZoneX;
   float colorBoxScale = 0.8f;
 
+  /** If the drawing is modifiable */
+  boolean readOnly = false;
+  
   /** For remapping mouse coordinates to canvas coordinates */
   double mouseToCanvasRescale = 1.0;
   
@@ -94,8 +97,8 @@ public class PatternCanvas
       int mouseX = (int)(evt.getOffsetX() * mouseToCanvasRescale);
       int mouseY = (int)(evt.getOffsetY() * mouseToCanvasRescale);
       // Check if clicking in a color area
-      if (checkForAndHandleColorPress(mouseX, mouseY))
-        return;
+//      if (checkForAndHandleColorPress(mouseX, mouseY))
+//        return;
       // Otherwise, check if the pattern is being drawn
       int row = findPatternRow(mouseX, mouseY);
       int col = findPatternCol(mouseX, mouseY);
@@ -131,12 +134,12 @@ public class PatternCanvas
       Touch touch = evt.getChangedTouches().item(0);
       int mouseX = (int)(pageXRelativeToEl(touch.getPageX(), canvas) * mouseToCanvasRescale);
       int mouseY = (int)(pageYRelativeToEl(touch.getPageY(), canvas) * mouseToCanvasRescale);
-      if (checkForAndHandleColorPress(mouseX, mouseY))
-      {
-        evt.preventDefault();
-        evt.stopPropagation();
-        return;
-      }
+//      if (checkForAndHandleColorPress(mouseX, mouseY))
+//      {
+//        evt.preventDefault();
+//        evt.stopPropagation();
+//        return;
+//      }
       // Otherwise, check if the pattern is being drawn
       int row = findPatternRow(mouseX, mouseY);
       int col = findPatternCol(mouseX, mouseY);
@@ -197,6 +200,7 @@ public class PatternCanvas
   {
     int row = findPatternRow(mouseX, mouseY);
     int col = findPatternCol(mouseX, mouseY);
+    if (readOnly) return;
     if (row >= 0 && row < data.height && col >= 0 && col < data.width)
     {
       data.rows[row].data[col] = isMouseTurnOn;
@@ -204,19 +208,19 @@ public class PatternCanvas
     }
   }
   
-  /** Returns true if mouse action is for a color press */
-  private boolean checkForAndHandleColorPress(int mouseX, int mouseY)
-  {
-    if (mouseX > colorZoneX && mouseX < colorZoneX + stitchXSpacing * colorBoxScale)
-    {
-      int row = findPatternRow(mouseX, mouseY);
-      if (row >= 0 && row < data.height)
-        data.rows[row].color = data.rows[row].color.nextColor();
-      draw();
-      return true;
-    }
-    return false;
-  }
+//  /** Returns true if mouse action is for a color press */
+//  private boolean checkForAndHandleColorPress(int mouseX, int mouseY)
+//  {
+//    if (mouseX > colorZoneX && mouseX < colorZoneX + stitchXSpacing * colorBoxScale)
+//    {
+//      int row = findPatternRow(mouseX, mouseY);
+//      if (row >= 0 && row < data.height)
+//        data.rows[row].color = data.rows[row].color.nextColor();
+//      draw();
+//      return true;
+//    }
+//    return false;
+//  }
   
   private int findPatternRow(int mouseX, int mouseY)
   {
@@ -300,23 +304,23 @@ public class PatternCanvas
 
       drawStitch(centerX, centerY);
       if (patternRow.data[col])
-        ctx.setFillStyle(patternRow.color.cssColor);
+        ctx.setFillStyle(data.fgndColor);
       else
-        ctx.setFillStyle("#fff");
+         ctx.setFillStyle(data.bgndColor);
       ctx.fill();
       ctx.stroke();
     }
-    for (int row = 0; row < data.height; row++)
-    {
-      int centerY = row * stitchYSpacing + stitchYSpacing / 2;
-      PatternRow patternRow = data.rows[row];
-      // Draw a color box on the end
-      ctx.beginPath();
-      ctx.rect(colorZoneX, (int)(centerY - stitchYSpacing / 2 * colorBoxScale), (int)(stitchXSpacing * colorBoxScale), (int)(stitchYSpacing * colorBoxScale));
-      ctx.setFillStyle(patternRow.color.cssColor);
-      ctx.fill();
-      ctx.stroke();
-    }
+//    for (int row = 0; row < data.height; row++)
+//    {
+//      int centerY = row * stitchYSpacing + stitchYSpacing / 2;
+//      PatternRow patternRow = data.rows[row];
+//      // Draw a color box on the end
+//      ctx.beginPath();
+//      ctx.rect(colorZoneX, (int)(centerY - stitchYSpacing / 2 * colorBoxScale), (int)(stitchXSpacing * colorBoxScale), (int)(stitchYSpacing * colorBoxScale));
+//      ctx.setFillStyle(patternRow.color.cssColor);
+//      ctx.fill();
+//      ctx.stroke();
+//    }
     ctx.restore();
   }
   

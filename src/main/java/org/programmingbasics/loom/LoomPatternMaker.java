@@ -49,7 +49,7 @@ public class LoomPatternMaker
     {
       JsonObject rowJson = Json.createObject();
       arr.set(arr.length(), rowJson);
-      rowJson.put("color", row.color.name());
+//      rowJson.put("color", row.color.name());
       String rowData = "";
       for (boolean bit: row.data)
         rowData += (bit ? "1" : "0");
@@ -69,7 +69,7 @@ public class LoomPatternMaker
       JsonObject rowJson = arr.getObject(n);
       String rowData = rowJson.getString("data");
       PatternRow row = new PatternRow(rowData.length());
-      row.color = RowColor.valueOf(rowJson.getString("color"));
+//      row.color = RowColor.valueOf(rowJson.getString("color"));
       for (int i = 0; i < rowData.length(); i++)
         row.data[i] = (rowData.charAt(i) == '1');
       rows.add(row);
@@ -81,10 +81,27 @@ public class LoomPatternMaker
     handleResize();
   }
   
-  public static LoomPatternMaker createUi(CanvasElement canvasEl)
+  public void setReadOnly(boolean readOnly)
+  {
+     canvas.readOnly = readOnly;
+  }
+  
+  public void setForegroundColor(String color)
+  {
+     data.fgndColor = color;
+     canvas.draw();
+  }
+
+  public void setBackgroundColor(String color)
+  {
+     data.bgndColor = color;
+     canvas.draw();
+  }
+
+  public static LoomPatternMaker createUi(CanvasElement canvasEl, int width, int height)
   {
     LoomPatternMaker loom = new LoomPatternMaker();
-    loom.data = new PatternData();
+    loom.data = new PatternData(width, height);
     loom.canvas = new PatternCanvas(canvasEl, loom.data);
     loom.canvas.draw();
     return loom;
