@@ -18,7 +18,9 @@ import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 import elemental.xpath.DOMParser;
 import elemental.xpath.XMLSerializer;
+import elemental.xpath.XPathNSResolver;
 import elemental.xpath.XPathResult;
+import jsinterop.annotations.JsFunction;
 import jsinterop.annotations.JsType;
 
 @JsType
@@ -87,6 +89,13 @@ public class LoomPatternMaker
     return loom;
   }
   
+  private static native XPathNSResolver getSvgNSResolver() /*-{
+    return function(prefix) {
+      if ('svg' == prefix) return 'http://www.w3.org/2000/svg';
+      return null;
+    }
+  }-*/;
+
   public static String createSvgLaserCutterFile(String baseSvg, JsonObject json)
   {
     // Read in the pattern data
@@ -99,7 +108,7 @@ public class LoomPatternMaker
     
     // Modify SVG to fit the data
     // Find all the paths that meet that refer to stitches
-    XPathResult result = doc.evaluate("//g[@id='Holes_Pixels']/path", doc, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
+    XPathResult result = doc.evaluate("//svg:g[@id='Holes_Pixels']/svg:path", doc, getSvgNSResolver(), XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
     List<Node> stitchNodes = new ArrayList<>();
     for (Node resultNode = result.iterateNext(); resultNode != null; resultNode = result.iterateNext())
       stitchNodes.add(resultNode);
