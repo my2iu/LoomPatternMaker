@@ -99,7 +99,7 @@ public class LoomPatternMaker
     
     // Modify SVG to fit the data
     // Find all the paths that meet that refer to stitches
-    XPathResult result = doc.evaluate("//path", doc, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
+    XPathResult result = doc.evaluate("//g[@id='Holes_Pixels']/path", doc, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
     List<Node> stitchNodes = new ArrayList<>();
     for (Node resultNode = result.iterateNext(); resultNode != null; resultNode = result.iterateNext())
       stitchNodes.add(resultNode);
