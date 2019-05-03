@@ -119,7 +119,7 @@ public class LoomPatternMaker
       {
         if (!data.rows[row].data[col])
         {
-          int idx = row * data.width + col;
+          int idx = (data.height - 1 - row) * data.width + (data.width - 1 - col);
           if (idx < stitchNodes.size())
           {
             Node node = stitchNodes.get(idx);
