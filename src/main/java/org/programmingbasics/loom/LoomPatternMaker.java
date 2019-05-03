@@ -96,6 +96,21 @@ public class LoomPatternMaker
     }
   }-*/;
 
+  public static JavaScriptObject invertJsonPattern(JsonObject json)
+  {
+    // Read in the pattern data
+    PatternData data = new PatternData();
+    setDataJson(json, data);
+   
+    // Invert all the data
+    for (PatternData.PatternRow row: data.rows)
+      for (int n = 0; n < row.data.length; n++)
+        row.data[n] = !row.data[n];
+    
+    // Return the new data
+    return getDataJson(data);
+  }
+  
   public static String createSvgLaserCutterFile(String baseSvg, JsonObject json)
   {
     // Read in the pattern data
@@ -117,7 +132,7 @@ public class LoomPatternMaker
     {
       for (int col = 0; col < data.width; col++)
       {
-        if (!data.rows[row].data[col])
+        if (data.rows[row].data[col])
         {
           int idx = (data.height - 1 - row) * data.width + (data.width - 1 - col);
           if (idx < stitchNodes.size())
