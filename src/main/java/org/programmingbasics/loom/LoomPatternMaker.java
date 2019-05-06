@@ -122,7 +122,7 @@ public class LoomPatternMaker
     Document doc = parser.parseFromString(baseSvg, "text/xml");
     
     // Modify SVG to fit the data
-    // Find all the paths that meet that refer to stitches
+    // Find all the paths that refer to stitches
     XPathResult result = doc.evaluate("//svg:g[@id='Holes_Pixels']/svg:path", doc, getSvgNSResolver(), XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
     List<Node> stitchNodes = new ArrayList<>();
     for (Node resultNode = result.iterateNext(); resultNode != null; resultNode = result.iterateNext())
@@ -134,7 +134,7 @@ public class LoomPatternMaker
       {
         if (data.rows[row].data[col])
         {
-          int idx = (data.height - 1 - row) * data.width + (data.width - 1 - col);
+          int idx = row * data.width + col;
           if (idx < stitchNodes.size())
           {
             Node node = stitchNodes.get(idx);
