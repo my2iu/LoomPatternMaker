@@ -20,7 +20,6 @@ import elemental.xpath.DOMParser;
 import elemental.xpath.XMLSerializer;
 import elemental.xpath.XPathNSResolver;
 import elemental.xpath.XPathResult;
-import jsinterop.annotations.JsFunction;
 import jsinterop.annotations.JsType;
 
 @JsType
@@ -33,7 +32,7 @@ public class LoomPatternMaker
   public void go()
   {
     data = new PatternData();
-    canvas = new PatternCanvasDiagonalStitch((CanvasElement)Browser.getDocument().querySelector("canvas#main"), data);
+    canvas = new PatternCanvasDoubleHeight((CanvasElement)Browser.getDocument().querySelector("canvas#main"), data);
     canvas.draw();
     
     // Hook for resizing
@@ -84,7 +83,7 @@ public class LoomPatternMaker
   {
     LoomPatternMaker loom = new LoomPatternMaker();
     loom.data = new PatternData(width, height);
-    loom.canvas = new PatternCanvasDiagonalStitch(canvasEl, loom.data);
+    loom.canvas = new PatternCanvasDoubleHeight(canvasEl, loom.data);
     loom.canvas.draw();
     return loom;
   }
