@@ -2,7 +2,7 @@ package org.programmingbasics.loom;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.programmingbasics.loom.PatternCanvas.DrawOrder;
+import org.programmingbasics.loom.PatternCanvasDiagonalStitch.DrawOrder;
 
 public class PatternCanvasTest
 {
