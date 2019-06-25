@@ -17,6 +17,7 @@ public class PatternCanvasDoubleHeight extends PatternCanvas
   int xOffset;
   int yOffset;
   int cornerRadius;
+  double stitchSpacing;
   
   public PatternCanvasDoubleHeight(CanvasElement canvas, PatternData data)
   {
@@ -27,13 +28,12 @@ public class PatternCanvasDoubleHeight extends PatternCanvas
   {
     super.adjustResolution();
 
-    double STITCH_SPACING = 2 * mouseToCanvasRescale;
-
     // Alter the sizing of everything to fill the canvas
+    stitchSpacing = 2 * mouseToCanvasRescale;
     stitchWidth = (int)((canvas.getWidth() - 2 * margin) / data.width);
     stitchHeight = (int)((canvas.getHeight() - 2 * margin) / data.height);
-    halfStitchHeight = (int)(stitchHeight - 2 * STITCH_SPACING) / 2;
-    stitchHeight = (int)(halfStitchHeight * 2 + 2 * STITCH_SPACING);
+    halfStitchHeight = (int)(stitchHeight - 2 * stitchSpacing) / 2;
+    stitchHeight = (int)(halfStitchHeight * 2 + 2 * stitchSpacing);
     xOffset = (canvas.getWidth() - data.width * stitchWidth) / 2;
     yOffset = (canvas.getHeight() - data.height * stitchHeight) / 2;
     cornerRadius = Math.min(halfStitchHeight / 2, stitchWidth / 2);
@@ -111,6 +111,22 @@ public class PatternCanvasDoubleHeight extends PatternCanvas
       }
     }
 
+    // Draw a grid over top the lines
+    ctx.setGlobalAlpha(0.5f);
+    ctx.setStrokeStyle("cyan");
+    ctx.beginPath();
+    for (int row = 1; row < data.height; row++)
+    {
+      ctx.moveTo(xOffset, (float)(row * stitchHeight + yOffset - mouseToCanvasRescale));
+      ctx.lineTo(xOffset + data.width * stitchWidth, (float)(row * stitchHeight + yOffset - mouseToCanvasRescale));
+    }
+    for (int col = 1; col < data.width; col++)
+    {
+      ctx.moveTo(xOffset + col * stitchWidth, yOffset);
+      ctx.lineTo(xOffset + col * stitchWidth, yOffset + data.height * stitchHeight);
+    }
+    ctx.stroke();
+    
     
     ctx.restore();
   }
@@ -121,8 +137,7 @@ public class PatternCanvasDoubleHeight extends PatternCanvas
     int y1 = (int)(row * stitchHeight) + yOffset;
     
     int x2 = (int)((col + len) * stitchWidth) + xOffset;
-    double STITCH_SPACING = 2 * mouseToCanvasRescale;
-    float y2 = (float)(y1 + halfStitchHeight + STITCH_SPACING);
+    float y2 = (float)(y1 + halfStitchHeight + stitchSpacing);
     
 //    int halfStitchHeight = (stitchHeight - 2 * STITCH_SPACING) / 2;
     
