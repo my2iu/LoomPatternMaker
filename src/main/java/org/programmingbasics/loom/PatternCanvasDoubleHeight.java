@@ -2,6 +2,7 @@ package org.programmingbasics.loom;
 
 import org.programmingbasics.loom.PatternData.PatternRow;
 
+import elemental.client.Browser;
 import elemental.html.CanvasElement;
 
 public class PatternCanvasDoubleHeight extends PatternCanvas
@@ -12,7 +13,11 @@ public class PatternCanvasDoubleHeight extends PatternCanvas
   // if you assign values here in the child).
   int stitchWidth;
   int stitchHeight;
-
+  int halfStitchHeight;
+  int xOffset;
+  int yOffset;
+  int cornerRadius;
+  
   public PatternCanvasDoubleHeight(CanvasElement canvas, PatternData data)
   {
     super(canvas, data);
@@ -21,16 +26,24 @@ public class PatternCanvasDoubleHeight extends PatternCanvas
   @Override public void adjustResolution()
   {
     super.adjustResolution();
-    
+
+    double STITCH_SPACING = 2 * mouseToCanvasRescale;
+
     // Alter the sizing of everything to fill the canvas
     stitchWidth = (int)((canvas.getWidth() - 2 * margin) / data.width);
     stitchHeight = (int)((canvas.getHeight() - 2 * margin) / data.height);
+    halfStitchHeight = (int)(stitchHeight - 2 * STITCH_SPACING) / 2;
+    stitchHeight = (int)(halfStitchHeight * 2 + 2 * STITCH_SPACING);
+    xOffset = (canvas.getWidth() - data.width * stitchWidth) / 2;
+    yOffset = (canvas.getHeight() - data.height * stitchHeight) / 2;
+    cornerRadius = Math.min(halfStitchHeight / 2, stitchWidth / 2);
+    
   }
 
   @Override
   protected int findPatternRow(int mouseX, int mouseY)
   {
-    mouseY -= margin;
+    mouseY -= yOffset;
     double row = (double)mouseY / stitchHeight;
     if (row > data.height && mouseY - ((data.height - 1) * stitchHeight) < stitchHeight)
       return data.height - 1;
@@ -40,7 +53,7 @@ public class PatternCanvasDoubleHeight extends PatternCanvas
   @Override
   protected int findPatternCol(int mouseX, int mouseY)
   {
-    mouseX -= margin;
+    mouseX -= xOffset;
     int col = (int)(mouseX / stitchWidth);
     return col < 0 ? 0 : col;
   }
@@ -58,19 +71,41 @@ public class PatternCanvasDoubleHeight extends PatternCanvas
     ctx.setLineWidth((float)mouseToCanvasRescale);
     ctx.setStrokeStyle("black");
     ctx.setFillStyle(data.fgndColor);
+    // Shift everything by 0.5 so that lines are aligned to the center of pixels
+    ctx.translate(0.5f, 0.5f);
 
     for (int row = 0; row < data.height; row++)
     {
+      int startRun = -1;
+      int runLength = 0;
+      
       for (int col = 0; col < data.width; col++)
       {
         PatternRow patternRow = data.rows[row];
-        int y = (int)(row * stitchHeight) + margin;
-        int x = (int)(col * stitchWidth) + margin;
+//        int y = (int)(row * stitchHeight) + margin;
+//        int x = (int)(col * stitchWidth) + margin;
 
         if (patternRow.data[col])
-          drawStitchRun(col, row, 1);
-//        else
-//           ctx.setFillStyle(data.bgndColor);
+        {
+          if (startRun < 0)
+          {
+            startRun = col;
+            runLength = 1;
+          }
+          else
+            runLength++;
+        }
+        else if (startRun >= 0)
+        {
+          drawStitchRun(startRun, row, runLength);
+          ctx.fill();
+          ctx.stroke();
+          startRun = -1;
+        }
+      }
+      if (startRun >= 0)
+      {
+        drawStitchRun(startRun, row, runLength);
         ctx.fill();
         ctx.stroke();
       }
@@ -82,27 +117,34 @@ public class PatternCanvasDoubleHeight extends PatternCanvas
   
   private void drawStitchRun(int col, int row, int len)
   {
-    int x1 = (int)(col * stitchWidth) + margin;
-    int y1 = (int)(row * stitchHeight) + margin;
+    int x1 = (int)(col * stitchWidth) + xOffset;
+    int y1 = (int)(row * stitchHeight) + yOffset;
     
-    int x2 = (int)((col + len) * stitchWidth) + margin;
-    int y2 = (int)((row  + 1) * stitchHeight) + margin;
+    int x2 = (int)((col + len) * stitchWidth) + xOffset;
+    double STITCH_SPACING = 2 * mouseToCanvasRescale;
+    float y2 = (float)(y1 + halfStitchHeight + STITCH_SPACING);
     
-    int STITCH_SPACING = 3;
-    int halfStitchHeight = (stitchHeight - 2 * STITCH_SPACING) / 2;
+//    int halfStitchHeight = (stitchHeight - 2 * STITCH_SPACING) / 2;
     
     ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y1);
-    ctx.lineTo(x2, y1 + halfStitchHeight);
-    ctx.lineTo(x1, y1 + halfStitchHeight);
+    drawHalfStitch(x1, y1, x2);
     ctx.closePath();
     
-    ctx.moveTo(x1, y1 + halfStitchHeight + STITCH_SPACING);
-    ctx.lineTo(x2, y1 + halfStitchHeight + STITCH_SPACING);
-    ctx.lineTo(x2, y1 + 2 * halfStitchHeight + STITCH_SPACING);
-    ctx.lineTo(x1, y1 + 2 * halfStitchHeight + STITCH_SPACING);
+    drawHalfStitch(x1, y2, x2);
     ctx.closePath();
+  }
+
+  private void drawHalfStitch(float x1, float y1, float x2)
+  {
+    ctx.moveTo(x1 + cornerRadius, y1);
+    ctx.lineTo(x2 - cornerRadius, y1);
+    ctx.arcTo(x2, y1, x2, y1 + cornerRadius, cornerRadius);
+    ctx.lineTo(x2, y1 + halfStitchHeight - cornerRadius);
+    ctx.arcTo(x2, y1 + halfStitchHeight, x2 - cornerRadius, y1 + halfStitchHeight, cornerRadius);
+    ctx.lineTo(x1 + cornerRadius, y1 + halfStitchHeight);
+    ctx.arcTo(x1, y1 + halfStitchHeight, x1, y1 + halfStitchHeight - cornerRadius, cornerRadius);
+    ctx.lineTo(x1, y1 + cornerRadius);
+    ctx.arcTo(x1, y1, x1 + cornerRadius, y1, cornerRadius);
   }
   
 }

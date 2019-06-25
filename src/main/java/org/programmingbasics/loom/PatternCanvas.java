@@ -100,6 +100,12 @@ public abstract class PatternCanvas
       MouseEvent evt = (MouseEvent)e;
       evt.preventDefault();
       evt.stopPropagation();
+      if (isTrackingMouseOnPattern)
+      {
+        int mouseX = (int)(evt.getOffsetX() * mouseToCanvasRescale);
+        int mouseY = (int)(evt.getOffsetY() * mouseToCanvasRescale);
+        handlePointerOnPattern(mouseX, mouseY);
+      }
       isTrackingMouseOnPattern = false;
     }, false);
     
